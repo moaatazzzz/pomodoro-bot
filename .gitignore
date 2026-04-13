@@ -1,0 +1,13 @@
+# Data files
+pomodoro_data.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/

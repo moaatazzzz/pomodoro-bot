@@ -1,0 +1,11 @@
+services:
+  - type: background_worker
+    name: pomodoro-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python pomodoro_bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHANNEL_ID
+        sync: false
