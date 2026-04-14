@@ -721,7 +721,24 @@ def main():
     app.add_error_handler(error_handler)
 
     log.info("🍅 Pomodoro bot is running...")
-    app.run_polling()
+
+    render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+    if render_host:
+        # Webhook mode on Render — no polling conflicts
+        port = int(os.environ.get("PORT", 10000))
+        webhook_url = f"https://{render_host}/"
+        log.info(f"Webhook mode: {webhook_url} on port {port}")
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            url_path="",
+            webhook_url=webhook_url,
+            drop_pending_updates=True,
+        )
+    else:
+        # Polling mode for local development
+        log.info("Polling mode (local)")
+        app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 services:
-  - type: background_worker
+  - type: web
     name: pomodoro-bot
     runtime: python
     buildCommand: pip install -r requirements.txt
