@@ -35,7 +35,7 @@ from telegram.ext import (
     ApplicationBuilder, MessageHandler, CommandHandler,
     filters, ContextTypes,
 )
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import datetime as dt
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
@@ -605,7 +605,7 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ── SCHEDULED: midnight top-3 ─────────────────────────────────────────────────
 
-async def post_daily_top3(bot: Bot):
+async def post_daily_top3(context: ContextTypes.DEFAULT_TYPE):
     data     = load_data()
     key      = today_key()
     day_data = data.get("daily", {}).get(key, {})
@@ -625,7 +625,7 @@ async def post_daily_top3(bot: Bot):
 
     msg = "\n".join(lines)
     if CHANNEL_ID != "@your_channel_username":
-        await bot.send_message(chat_id=CHANNEL_ID, text=msg, parse_mode="Markdown")
+        await context.bot.send_message(chat_id=CHANNEL_ID, text=msg, parse_mode="Markdown")
     log.info(f"Daily top-3 posted for {key}")
 
 # ── RESTORE CYCLES ON RESTART ─────────────────────────────────────────────────
@@ -706,15 +706,11 @@ def main():
     app.add_handler(CommandHandler("reset_today", cmd_reset_today))
     app.add_handler(CommandHandler("broadcast",   cmd_broadcast))
 
-    # Scheduler — midnight top-3
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(
+    # Scheduler — midnight top-3 via built-in job queue
+    app.job_queue.run_daily(
         post_daily_top3,
-        trigger="cron",
-        hour=0, minute=0,
-        args=[app.bot],
+        time=dt.time(hour=0, minute=0, second=0),
     )
-    scheduler.start()
 
     log.info("🍅 Pomodoro bot is running...")
     app.run_polling()
