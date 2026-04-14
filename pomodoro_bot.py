@@ -671,6 +671,11 @@ async def restore_cycles(app):
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """Log errors without crashing the bot."""
+    log.error(f"Error: {context.error}")
+
+
 def main():
     if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
         log.error("❌ BOT_TOKEN not set!")
@@ -711,6 +716,9 @@ def main():
         post_daily_top3,
         time=dt.time(hour=0, minute=0, second=0),
     )
+
+    # Error handler — prevents crashes from transient Telegram errors
+    app.add_error_handler(error_handler)
 
     log.info("🍅 Pomodoro bot is running...")
     app.run_polling()
